@@ -1,26 +1,77 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import debounce from 'lodash/debounce';
 
 const Desktop2 = () => {
   const [moodInput, setMoodInput] = useState('');
   const [playlist, setPlaylist] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loadingManual, setLoadingManual] = useState(false);
+  const [loadingWeather, setLoadingWeather] = useState(false);
+  const [cityInput, setCityInput] = useState('');
+  const [citySuggestions, setCitySuggestions] = useState([]);
+  const [selectedCity, setSelectedCity] = useState(null);
 
-  const handleLocationClick = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          console.log("Latitude:", position.coords.latitude);
-          console.log("Longitude:", position.coords.longitude);
-        },
-        (error) => {
-          console.error("Error getting location:", error);
-        }
-      );
+
+  useEffect(() => {
+    if (cityInput.length > 1 && !selectedCity) {
+      fetchCitySuggestions(cityInput);
     } else {
-      alert("Geolocation is not supported by this browser.");
+      setCitySuggestions([]);
+    }
+  }, [cityInput]);
+
+
+  const fetchCitySuggestions = debounce(async (query) => {
+    if (query.length < 2) return;
+
+    try {
+      const res = await fetch(`/api/cities?q=${query}`);
+      const data = await res.json();
+      setCitySuggestions(data.slice(0, 5)); // only top 5
+    } catch (err) {
+      console.error('Failed to fetch city suggestions', err);
+    }
+  }, 300);
+
+
+  const handleLocationClick = async () => {
+    let lat, lon;
+
+    if (selectedCity) {
+      lat = selectedCity.lat;
+      lon = selectedCity.lon;
+    } else {
+      alert("Please select a location from the suggestions.");
+      return;
+    }
+
+    setLoadingWeather(true);
+    try {
+      const res = await fetch('/api/generate-playlist/weather', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lat, lon }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        const cleaned = (data.songs || [])
+          .filter(song => song && typeof song === 'object' && song.name && song.artist)
+          .map(song => `${song.name} - ${song.artist}`);
+        setPlaylist(cleaned);
+        setShowPopup(true);
+      } else {
+        alert(data.error || 'Failed to generate weather-based playlist.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Something went wrong. ' + err.message);
+    } finally {
+      setLoadingWeather(false);
     }
   };
+
+
 
   const handleCameraClick = () => {
     alert("Camera functionality coming soon!");
@@ -32,7 +83,7 @@ const Desktop2 = () => {
     return;
   }
 
-  setLoading(true);
+  setLoadingManual(true);
   try {
     const res = await fetch('/api/generate-playlist/manual', {
       method: 'POST',
@@ -70,7 +121,7 @@ const Desktop2 = () => {
     console.error('Full error object:', err);
     alert('Something went wrong. ' + err.message);
   } finally {
-    setLoading(false);
+    setLoadingManual(false);
   }
 };
 
@@ -169,10 +220,10 @@ const Desktop2 = () => {
           </div>
           <button
             onClick={handleGeneratePlaylist}
-            disabled={loading}
+            disabled={loadingManual}
             className="mt-4 w-full bg-[#CDBBFC] text-black py-2 rounded-lg font-semibold hover:opacity-80"
           >
-            {loading ? 'Generating...' : 'Generate Playlist'}
+            {loadingManual ? 'Generating...' : 'Generate Playlist'}
           </button>
         </div>
 
@@ -183,7 +234,31 @@ const Desktop2 = () => {
             type="text"
             placeholder="Enter your location"
             className="w-full p-2 rounded-md text-black"
+            value={cityInput}
+            onChange={(e) => {
+              setCityInput(e.target.value);
+              setSelectedCity(null); // reset previous selection
+            }}
           />
+
+          {citySuggestions.length > 0 && !selectedCity && (
+            <ul className="bg-white text-black rounded-md mt-1 max-h-40 overflow-y-auto shadow-lg">
+              {citySuggestions.map((city, index) => (
+                <li
+                  key={index}
+                  className="px-3 py-2 hover:bg-gray-200 cursor-pointer"
+                  onClick={() => {
+                    setSelectedCity(city);
+                    setCityInput(`${city.name}, ${city.country}`);
+                    setCitySuggestions([]); // hide dropdown
+                  }}
+                >
+                  {city.name}, {city.state ? city.state + ', ' : ''}{city.country}
+                </li>
+              ))}
+            </ul>
+          )}
+
           <div className="mt-4">
             <div
               className="w-full h-[100px] bg-white text-black flex items-center justify-center rounded-md cursor-pointer"
@@ -192,9 +267,14 @@ const Desktop2 = () => {
               gif
             </div>
           </div>
-          <button className="mt-4 w-full bg-[#CDBBFC] text-black py-2 rounded-lg font-semibold hover:opacity-80">
-            Generate Playlist
-          </button>
+          <button
+          onClick={handleLocationClick}
+          disabled={loadingWeather}
+          className="mt-4 w-full bg-[#CDBBFC] text-black py-2 rounded-lg font-semibold hover:opacity-80"
+        >
+          {loadingWeather ? 'Generating...' : 'Generate Playlist'}
+        </button>
+
         </div>
 
         {/* Section 3: Mirror your Mood */}
