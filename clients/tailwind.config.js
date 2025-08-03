@@ -5,7 +5,6 @@ module.exports = {
     extend: {
       colors: {
         global: {
-          background1: "var(--global-bg-1)",
           background2: "var(--global-bg-2)",
           background3: "var(--global-bg-3)",
           background4: "var(--global-bg-4)",
@@ -16,7 +15,8 @@ module.exports = {
         header: {
           text1: "var(--header-text-1)",
           text2: "var(--header-text-2)"
-        }
+        },
+        customBg: "#040C28" // ✅ Add this line
       },
       fontFamily: {
         'inria': ['Inria Sans', 'sans-serif'],
