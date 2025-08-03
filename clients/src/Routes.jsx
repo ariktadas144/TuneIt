@@ -1,17 +1,14 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 
-// Import page components
-import HomePage from './pages/Home';
+import Home from './pages/Home';
+import Desktop2 from './pages/Desktop2';
 
-const AppRoutes = () => {
+export default function AllRoutes() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-      </Routes>
-    </Router>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/vibe" element={<Desktop2 />} />
+    </Routes>
   );
-};
-
-export default AppRoutes;
+}
