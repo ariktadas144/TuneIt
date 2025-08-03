@@ -1,29 +1,60 @@
+import axios from 'axios';
+
 export const getSongsFromGemini = async (mood) => {
-  console.log(`💡 Gemini is currently unavailable. Using dummy data for mood: "${mood}"`);
+  const geminiPrompt = `
+    Based on the user's mood "${mood}", suggest a Spotify playlist of 20 songs.
+    Provide the song name and artist in this format: "Song Name - Artist".
+    Do not include links or numbering. Just a plain list.
+  `;
 
-  // Simulated playlist based on mood
-  const dummySongs = [
-    { title: "Happy", artist: "Pharrell Williams" },
-    { title: "Can't Stop the Feeling!", artist: "Justin Timberlake" },
-    { title: "Good as Hell", artist: "Lizzo" },
-    { title: "Uptown Funk", artist: "Mark Ronson ft. Bruno Mars" },
-    { title: "Walking on Sunshine", artist: "Katrina & The Waves" },
-    { title: "Shake It Off", artist: "Taylor Swift" },
-    { title: "Good Vibes", artist: "Chris Janson" },
-    { title: "Sugar", artist: "Maroon 5" },
-    { title: "On Top of the World", artist: "Imagine Dragons" },
-    { title: "Best Day of My Life", artist: "American Authors" },
-    { title: "High Hopes", artist: "Panic! At The Disco" },
-    { title: "I'm Yours", artist: "Jason Mraz" },
-    { title: "Feel It Still", artist: "Portugal. The Man" },
-    { title: "Better When I'm Dancin'", artist: "Meghan Trainor" },
-    { title: "Shotgun", artist: "George Ezra" },
-    { title: "Sunflower", artist: "Post Malone & Swae Lee" },
-    { title: "Happier", artist: "Marshmello ft. Bastille" },
-    { title: "Stronger", artist: "Kanye West" },
-    { title: "Rather Be", artist: "Clean Bandit ft. Jess Glynne" },
-    { title: "Don't Worry Be Happy", artist: "Bobby McFerrin" }
-  ];
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY_MS = 2000;
 
-  return dummySongs;
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      console.log("Gemini prompt:", geminiPrompt);
+
+      const response = await axios.post(
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent',
+        {
+          contents: [{ parts: [{ text: geminiPrompt }] }],
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': process.env.GEMINI_API_KEY,
+          },
+        }
+      );
+      
+
+      const rawText = response?.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      console.log('Gemini raw response text:', rawText);
+
+
+      if (!rawText) return [];
+
+      const songs = rawText
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.includes(' - '))
+        .slice(0, 20);
+
+      console.log('songs:\n', songs);
+
+      return songs;
+
+    } catch (err) {
+      if (err.response?.status === 429 && attempt < MAX_RETRIES) {
+        console.warn(`Rate limited (429). Retrying in ${RETRY_DELAY_MS / 1000}s... [Attempt ${attempt}]`);
+        await new Promise(res => setTimeout(res, RETRY_DELAY_MS));
+      } else {
+        console.error('Gemini API error:', err.message);
+        return [];
+      }
+    }
+  }
+
+  return [];
 };

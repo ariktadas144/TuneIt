@@ -35,17 +35,34 @@ const Desktop2 = () => {
 
 
   const handleLocationClick = async () => {
+    setLoadingWeather(true);
     let lat, lon;
 
     if (selectedCity) {
       lat = selectedCity.lat;
       lon = selectedCity.lon;
     } else {
-      alert("Please select a location from the suggestions.");
-      return;
+      // Try getting user's actual geolocation
+      try {
+        const position = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0,
+          });
+        });
+
+        lat = position.coords.latitude;
+        lon = position.coords.longitude;
+      } catch (geoErr) {
+        console.error("Geolocation error:", geoErr);
+        alert("Please allow location access or select a city manually.");
+        setLoadingWeather(false);
+        return;
+      }
     }
 
-    setLoadingWeather(true);
+    // Now send the POST request
     try {
       const res = await fetch('/api/generate-playlist/weather', {
         method: 'POST',
@@ -68,6 +85,28 @@ const Desktop2 = () => {
       alert('Something went wrong. ' + err.message);
     } finally {
       setLoadingWeather(false);
+    }
+  };
+
+
+  const requestUserLocation = async () => {
+    try {
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+        });
+      });
+
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+
+      console.log("Location permission granted. Coords:", lat, lon);
+      alert("Location access granted ✅");
+    } catch (err) {
+      console.error("Location access denied or failed:", err);
+      alert("Location access denied ❌");
     }
   };
 
@@ -96,8 +135,9 @@ const Desktop2 = () => {
     let data;
     try {
       data = await res.json(); // only try if response has content
-      console.log("Response data:", data); // 👈 ADD THIS
-      console.log("Raw songs array from backend:", data.songs);
+      console.log("✅ Raw response from backend:", data);
+      console.log("✅ Raw data.songs type:", typeof data.songs, "Value:", data.songs);
+
 
     } catch (jsonErr) {
       throw new Error('Invalid JSON response from server.');
@@ -105,12 +145,21 @@ const Desktop2 = () => {
 
     if (res.ok) {
       // Clean and format the playlist
-      const cleaned = (data.songs || [])
-    .filter(song => song && typeof song === 'object' && song.name && song.artist)
-    .map(song => `${song.name} - ${song.artist}`);
+      let cleaned = [];
+
+      if (Array.isArray(data.songs)) {
+        cleaned = data.songs
+          .filter(line => typeof line === 'string' && line.includes(' - '))
+          .map(line => line.trim());
+      } else {
+        console.error("❌ data.songs is not an array:", data.songs);
+      }
+
+
 
       
-      console.log("Raw songs from backend:", data.songs);
+      console.log("✅ Cleaned playlist (frontend):", cleaned);
+
       setPlaylist(cleaned);
 
       setShowPopup(true);
@@ -139,6 +188,7 @@ const Desktop2 = () => {
               ×
             </button>
             <h2 className="text-lg font-semibold mb-4">🎶 Your Playlist</h2>
+
             {Array.isArray(playlist) && playlist.length > 0 ? (
             <ul className="space-y-2 max-h-80 overflow-y-auto">
               {playlist.map((song, i) => (
@@ -262,7 +312,7 @@ const Desktop2 = () => {
           <div className="mt-4">
             <div
               className="w-full h-[100px] bg-white text-black flex items-center justify-center rounded-md cursor-pointer"
-              onClick={handleLocationClick}
+              onClick={requestUserLocation}
             >
               gif
             </div>
