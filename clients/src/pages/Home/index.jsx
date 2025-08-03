@@ -1,7 +1,10 @@
 import React from 'react';
 import Header from '../../components/common/Header';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="flex flex-col gap-[49px] sm:gap-[73px] md:gap-[98px] justify-start items-center w-full bg-global-1">
       {/* Header Section */}
@@ -44,9 +47,12 @@ const Home = () => {
         </div>
         
         {/* Get Started Button */}
-        <button className="text-[18px] sm:text-[27px] md:text-[36px] font-poppins font-medium leading-[27px] sm:leading-[40px] md:leading-[54px] text-left text-global-1 bg-[linear-gradient(90deg,#9f84f1_0%,#6083ee_50%,#9f84f1_100%)] rounded-[24px] px-[17px] sm:px-[25px] md:px-[34px] py-[3px] sm:py-[4px] md:py-[6px] mt-[36px] sm:mt-[54px] md:mt-[72px] hover:opacity-90 transition-opacity">
-          GET STARTED
-        </button>
+        <button
+  onClick={() => navigate('/desktop2')}
+  className="text-[18px] sm:text-[27px] md:text-[36px] font-poppins font-medium leading-[27px] sm:leading-[40px] md:leading-[54px] text-left text-global-1 bg-[linear-gradient(90deg,#9f84f1_0%,#6083ee_50%,#9f84f1_100%)] rounded-[24px] px-[17px] sm:px-[25px] md:px-[34px] py-[3px] sm:py-[4px] md:py-[6px] mt-[36px] sm:mt-[54px] md:mt-[72px] hover:opacity-90 transition-opacity"
+>
+  GET STARTED
+</button>
         
         {/* Features Section */}
         <div className="flex flex-col justify-start items-center w-full max-w-[1320px] mt-[58px] sm:mt-[87px] md:mt-[116px]">
