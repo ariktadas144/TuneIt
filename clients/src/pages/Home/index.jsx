@@ -6,7 +6,7 @@ const Home = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col gap-[49px] sm:gap-[73px] md:gap-[98px] justify-start items-center w-full bg-global-1">
+    <div className="flex flex-col gap-[49px] sm:gap-[73px] md:gap-[98px] justify-start items-center w-full bg-customBg">
       {/* Header Section */}
       <Header />
       
@@ -32,7 +32,7 @@ const Home = () => {
             
             {/* Description Row with Waveform */}
             <div className="flex flex-row justify-start items-end w-full gap-8">
-              <p className="text-[28px] font-lato font-normal leading-[34px] text-left text-global-2 flex-1">
+              <p className="text-[28px] font-lato font-normal leading-[34px] text-left text-white flex-1">
                 Create personalized playlists based on your mood and the weather around you. Whether it is a rainy day or a sunny vibe, match your feelings with the perfect sound
               </p>
               <div className="flex-shrink-0">
@@ -57,7 +57,7 @@ const Home = () => {
         {/* Features Section */}
         <div className="flex flex-col justify-start items-center w-full max-w-[1320px] mt-[58px] sm:mt-[87px] md:mt-[116px]">
           <div className="flex flex-col gap-[40px] sm:gap-[60px] md:gap-[80px] justify-start items-center w-full">
-            <h3 className="text-[32px] sm:text-[48px] md:text-[64px] font-poppins font-semibold leading-[48px] sm:leading-[72px] md:leading-[96px] text-center text-global-2 w-auto">
+            <h3 className="text-[32px] sm:text-[48px] md:text-[64px] font-poppins font-semibold leading-[48px] sm:leading-[72px] md:leading-[96px] text-center text-white w-auto">
               Features
             </h3>
             
@@ -160,11 +160,11 @@ const Home = () => {
         </div>
         
         {/* About Us Section */}
-        <h4 className="text-[32px] sm:text-[48px] md:text-[64px] font-poppins font-semibold leading-[48px] sm:leading-[72px] md:leading-[96px] text-left text-global-2 w-auto self-start mt-[44px] sm:mt-[66px] md:mt-[88px]">
+        <h4 className="text-[32px] sm:text-[48px] md:text-[64px] font-poppins font-semibold leading-[48px] sm:leading-[72px] md:leading-[96px] text-left text-white w-auto self-start mt-[44px] sm:mt-[66px] md:mt-[88px]">
           About us
         </h4>
-        
-        <p className="text-[16px] sm:text-[24px] md:text-[32px] font-poppins font-normal leading-[24px] sm:leading-[36px] md:leading-[48px] text-left text-global-2 w-[96%] max-w-[1320px] mt-[9px] sm:mt-[13px] md:mt-[18px]">
+
+        <p className="text-[16px] sm:text-[24px] md:text-[32px] font-poppins font-normal leading-[24px] sm:leading-[36px] md:leading-[48px] text-left text-white w-[96%] max-w-[1320px] mt-[9px] sm:mt-[13px] md:mt-[18px]">
           Let Your Mood, Weather, and Location Pick the Music<br />
           At TuneIt, we believe music is not just something you listen to — it is something you feel. Yet in a world of infinite playlists and recommendations, finding the perfect vibe can feel like a chore.<br />
           That is where TuneIt comes in.<br />
@@ -172,7 +172,7 @@ const Home = () => {
         </p>
         
         {/* Team Section */}
-        <h5 className="text-[32px] sm:text-[48px] md:text-[64px] font-inria font-bold leading-[38px] sm:text-[57px] md:leading-[77px] text-left text-global-2 w-auto self-start mt-[76px] sm:mt-[114px] md:mt-[152px]">
+        <h5 className="text-[32px] sm:text-[48px] md:text-[64px] font-inria font-bold leading-[38px] sm:text-[57px] md:leading-[77px] text-left text-white w-auto self-start mt-[76px] sm:mt-[114px] md:mt-[152px]">
           Team
         </h5>
         
